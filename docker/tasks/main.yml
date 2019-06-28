@@ -1,0 +1,3 @@
+- name: install docker 
+  raw: curl -sSl get.docker.com | sh 
+  

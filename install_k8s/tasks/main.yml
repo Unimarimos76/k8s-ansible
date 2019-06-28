@@ -1,0 +1,54 @@
+- name: swap off 
+  raw: swap off -a 
+
+- name: install transport https 
+ package: 
+   uname: apt-transport-https
+   state: present
+
+- name: add apt-key 
+  apt_key 
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+   state: present
+
+- name: add kubernetes apt repository 
+  apt: 
+    name: "{{ packages }} "
+  vars: 
+    packages:
+    - kubelet 
+    - kubeadm 
+    - kubernetes-cni=0.7.5-00
+
+- name: initialize lubeadm
+  raw: kubeadm init 
+  register: kubeadmInitOut
+  ignore_errors: yes
+
+
+- name: add user
+  user: 
+    name: user
+    state: present
+    shell: bin/bash
+    group: sudo 
+    home: /home/user
+
+- name: add kube config directory under $HOME
+  file: 
+    path: /home/user/.kube
+    state: directory
+    mode: 0755
+    group: sudo 
+    owner: user 
+
+- name: copy admin.cong to user's kube config
+  copy: 
+    src: /etc/kubernetes/admin.conf
+    dest: /home/user/.kube/config
+    remote_src: yes 
+    oener: user 
+    group: sudo 
+    
+   
+
